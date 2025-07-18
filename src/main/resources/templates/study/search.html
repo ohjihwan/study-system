@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색 결과 - 스터디 모집 시스템</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/studies">스터디 모집 시스템</a>
+            
+            <div class="navbar-nav ms-auto">
+                <div sec:authorize="isAuthenticated()">
+                    <span class="navbar-text me-3">
+                        안녕하세요, <span sec:authentication="name"></span>님!
+                    </span>
+                    <a class="nav-link d-inline" href="/mypage">마이페이지</a>
+                    <a class="nav-link d-inline" href="/studies/create">스터디 개설</a>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-light btn-sm">로그아웃</button>
+                    </form>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <a class="nav-link d-inline" href="/login">로그인</a>
+                    <a class="nav-link d-inline" href="/register">회원가입</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>검색 결과: "<span th:text="${keyword}"></span>"</h2>
+            <a href="/studies" class="btn btn-secondary">전체 목록</a>
+        </div>
+
+        <!-- 검색 폼 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form th:action="@{/studies/search}" method="get" class="d-flex">
+                    <input type="text" name="keyword" class="form-control me-2" th:value="${keyword}" placeholder="제목 또는 작성자로 검색">
+                    <button type="submit" class="btn btn-outline-primary">검색</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 검색 결과 -->
+        <div th:if="${#lists.isEmpty(studies)}" class="alert alert-info">
+            검색 결과가 없습니다.
+        </div>
+
+        <div class="row" th:if="${!#lists.isEmpty(studies)}">
+            <div th:each="study : ${studies}" class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${study.title}">스터디 제목</h5>
+                        <p class="card-text" th:text="${#strings.abbreviate(study.description, 100)}">스터디 설명</p>
+                        <p class="text-muted small">
+                            작성자: <span th:text="${study.creatorName}"></span><br>
+                            모집인원: <span th:text="${study.currentParticipants}"></span>/<span th:text="${study.maxParticipants}"></span><br>
+                            마감일: <span th:text="${#temporals.format(study.deadline, 'yyyy-MM-dd HH:mm')}"></span>
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a th:href="@{/studies/{id}(id=${study.id})}" class="btn btn-primary btn-sm">상세보기</a>
+                            <div>
+                                <span th:if="${study.full}" class="badge bg-danger">모집완료</span>
+                                <span th:if="${study.expired}" class="badge bg-secondary">마감</span>
+                                <span th:if="${!study.full && !study.expired}" class="badge bg-success">모집중</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 페이징 -->
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/studies/search(keyword=${keyword}, page=${currentPage - 1}, size=${size})}">이전</a>
+                </li>
+                
+                <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}" 
+                    class="page-item" th:classappend="${page == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/studies/search(keyword=${keyword}, page=${page}, size=${size})}" th:text="${page + 1}">1</a>
+                </li>
+                
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/studies/search(keyword=${keyword}, page=${currentPage + 1}, size=${size})}">다음</a>
+                </li>
+            </ul>
+        </nav>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

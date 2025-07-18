@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스터디 개설 - 스터디 모집 시스템</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/studies">스터디 모집 시스템</a>
+            
+            <div class="navbar-nav ms-auto">
+                <div sec:authorize="isAuthenticated()">
+                    <span class="navbar-text me-3">
+                        안녕하세요, <span sec:authentication="name"></span>님!
+                    </span>
+                    <a class="nav-link d-inline" href="/mypage">마이페이지</a>
+                    <a class="nav-link d-inline" href="/studies/create">스터디 개설</a>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-light btn-sm">로그아웃</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>스터디 개설</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/studies/create}" th:object="${study}" method="post">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">스터디 제목 *</label>
+                                <input type="text" class="form-control" th:field="*{title}"
+                                       th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                       placeholder="스터디 제목을 입력하세요">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" 
+                                     th:errors="*{title}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">스터디 설명 *</label>
+                                <textarea class="form-control" th:field="*{description}" rows="5"
+                                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"
+                                          placeholder="스터디에 대한 자세한 설명을 입력하세요"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" 
+                                     th:errors="*{description}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="maxParticipants" class="form-label">모집 인원 *</label>
+                                <input type="number" class="form-control" th:field="*{maxParticipants}" min="1" max="50"
+                                       th:classappend="${#fields.hasErrors('maxParticipants')} ? 'is-invalid' : ''"
+                                       placeholder="모집할 인원 수를 입력하세요">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('maxParticipants')}" 
+                                     th:errors="*{maxParticipants}"></div>
+                                <div class="form-text">최대 50명까지 모집 가능합니다.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="deadline" class="form-label">신청 마감일 *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{deadline}"
+                                       th:classappend="${#fields.hasErrors('deadline')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('deadline')}" 
+                                     th:errors="*{deadline}"></div>
+                                <div class="form-text">신청을 받을 마감 날짜와 시간을 설정하세요.</div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="/studies" class="btn btn-secondary">취소</a>
+                                <button type="submit" class="btn btn-primary">스터디 개설</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
